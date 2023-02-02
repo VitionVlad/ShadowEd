@@ -61,6 +61,12 @@ ofstream outputinit;
 
 ofstream outputinitj;
 
+ofstream projfile;
+
+ifstream projfilei;
+
+char projfilename[256];
+
 class lmesh{
     public:
     vector<vec3> vert;
@@ -406,6 +412,21 @@ void playersettingswindow(){
     ImGui::Begin("Player settings");
     ImGui::Checkbox("enable physics", &eng.enablePhysics);
     ImGui::Checkbox("enable colision", &eng.enableColision);
+    ImGui::InputText("project filename", projfilename, 256);
+    if(ImGui::Button("load project")){
+        projfilei.open(projfilename);
+        for(int i = 0; i != 1000; i++){
+            projfilei >> levelm[i].meshPosition.x >> levelm[i].meshPosition.y >> levelm[i].meshPosition.z >> levelm[i].meshRot.x >> levelm[i].meshRot.y >> levelm[i].meshRot.z >> levelm[i].meshScale.x >> levelm[i].meshScale.y >> levelm[i].meshScale.z >> pathtoalbedo[i] >> pathtospec[i] >> classname[i] >> classnamespec[i] >> objclassname[i] >> useuishader[i] >> reloadtex[i] >> writetextores[i] >> writetextoinit[i] >> writeobjtofile[i];
+        }
+        projfilei.close();
+    }
+    if(ImGui::Button("save project")){
+        projfile.open(projfilename);
+        for(int i = 0; i != 1000; i++){
+            projfile << levelm[i].meshPosition.x << " " << levelm[i].meshPosition.y << " " << levelm[i].meshPosition.z << " " << levelm[i].meshRot.x << " " << levelm[i].meshRot.y << " " << levelm[i].meshRot.z << " " << levelm[i].meshScale.x << " " << levelm[i].meshScale.y << " " << levelm[i].meshScale.z << " " << pathtoalbedo[i] << " " << pathtospec[i] << " " << classname[i] << " " << classnamespec[i] << " " << objclassname[i] << " " << useuishader[i] << " " << reloadtex[i] << " " << writetextores[i] << " " << writetextoinit[i] << " " << writeobjtofile[i] << endl;
+        }
+        projfile.close();
+    }
     ImGui::End();
 }
 
@@ -537,6 +558,12 @@ void lightEdit(){
     eng.lightColors[currentl*3+1] = v[1];
     eng.lightColors[currentl*3+2] = v[2];
     if(ImGui::Button("make light transform same as camera")){
+        eng.shadowProj.buildperspectivemat(eng.fov, 0.1, 100, 1, currentl);
+        eng.shadowTrans.buildtranslatemat(eng.pos, currentl);
+        eng.shadowxrot.buildxrotmat(eng.rot.y, currentl);
+        eng.shadowyrot.buildyrotmat(-eng.rot.x, currentl);
+    }
+    if(ImGui::Button("save transform to init file")){
         eng.shadowProj.buildperspectivemat(eng.fov, 0.1, 100, 1, currentl);
         eng.shadowTrans.buildtranslatemat(eng.pos, currentl);
         eng.shadowxrot.buildxrotmat(eng.rot.y, currentl);
