@@ -408,6 +408,67 @@ void mouse(){
     }
 }
 
+void meshInit(int currentm){
+    glDeleteTextures(1, &levelm[currentm].albedoHandle);
+    glDeleteTextures(1, &levelm[currentm].specularHandle);
+    if(reloadtex[currentm] == true){
+        objimport(pathtoobj[currentm], levelm[currentm]);
+        if(writetextores[currentm] == true){
+            loadImage(pathtoalbedo[currentm], levelm[currentm].texture, levelm[currentm].texResolution.x, levelm[currentm].texResolution.y, classname[currentm]);
+            loadImage(pathtospec[currentm], levelm[currentm].specular, levelm[currentm].texResolution.x, levelm[currentm].texResolution.y, classnamespec[currentm]);
+            outputres << "#include " << '"' << classname[currentm] << "_texture.hpp" << '"' << endl;
+            outputres << "#include " << '"' << classnamespec[currentm] << "_texture.hpp" << '"' << endl;
+        }
+        if(writeobjtofile[currentm] == true){
+            outputres << "#include " << '"' << objclassname[currentm] << "_model.hpp" << '"' << endl;
+            outputres << "#include " << '"' << objclassname[currentm] << "_normals.hpp" << '"' << endl;
+            outputres << "#include " << '"' << objclassname[currentm] << "_uv.hpp" << '"' << endl;
+            objexport(pathtoobj[currentm], objclassname[currentm]);
+        }
+        if(writetextoinit[currentm] == true){
+            outputinit << "Mesh no" << currentm << ";" << endl;
+            outputinitj << "Mesh no" << currentm << ";" << endl;
+            string msname = "no" + to_string(currentm);
+            outputinit << "void initm" << currentm << "(Engine &eng){" << endl;
+            outputinit << "eng.copyFloatArray(" << objclassname[currentm] << "_model().verts, " << msname << ".vertexes);" << endl;
+            outputinit << "eng.copyFloatArray(" << objclassname[currentm] << "_normals().normals, " << msname << ".normals);" << endl;
+            outputinit << "eng.copyFloatArray(" << objclassname[currentm] << "_uv().uv, " << msname << ".uv);" << endl;
+            outputinit << "eng.copyucharArray(" << classname[currentm] << "_texture().pixels, " << msname << ".texture);" << endl;
+            outputinit << "eng.copyucharArray(" << classnamespec[currentm] << "_texture().pixels, " << msname << ".specular);" << endl;
+            outputinit << msname << ".texResolution.x = " << levelm[currentm].texResolution.x << ";" << endl;
+            outputinit << msname << ".texResolution.y = " << levelm[currentm].texResolution.y << ";" << endl;
+            outputinit << msname << ".meshPosition.x = " << levelm[currentm].meshPosition.x << ";" << endl;
+            outputinit << msname << ".meshPosition.y = " << levelm[currentm].meshPosition.y << ";" << endl;
+            outputinit << msname << ".meshPosition.z = " << levelm[currentm].meshPosition.z << ";" << endl;
+            outputinit << msname << ".initMesh(fragmentShaderCode, vertexShaderCode);" << endl;
+            outputinit << "}" << endl;
+            outputinitj << "void initm" << currentm << "(Engine eng){" << endl;
+            outputinitj << "eng.copyFloatArray(" << objclassname[currentm] << "_model().verts, " << msname << ".vertexes);" << endl;
+            outputinitj << "eng.copyFloatArray(" << objclassname[currentm] << "_normals().normals, " << msname << ".normals);" << endl;
+            outputinitj << "eng.copyFloatArray(" << objclassname[currentm] << "_uv().uv, " << msname << ".uv);" << endl;
+            outputinitj << "eng.copyucharArray(" << classname[currentm] << "_texture().pixels, " << msname << ".texture);" << endl;
+            outputinitj << "eng.copyucharArray(" << classnamespec[currentm] << "_texture().pixels, " << msname << ".specular);" << endl;
+            outputinitj << msname << ".texResolution = new ivec2();" << endl;
+            outputinitj << msname << ".texResolution.x = " << levelm[currentm].texResolution.x << ";" << endl;
+            outputinitj << msname << ".texResolution.y = " << levelm[currentm].texResolution.y << ";" << endl;
+            outputinitj << msname << ".meshPosition = new vec3();" << endl;
+            outputinitj << msname << ".meshPosition.x = " << levelm[currentm].meshPosition.x << ";" << endl;
+            outputinitj << msname << ".meshPosition.y = " << levelm[currentm].meshPosition.y << ";" << endl;
+            outputinitj << msname << ".meshPosition.z = " << levelm[currentm].meshPosition.z << ";" << endl;
+            outputinitj << msname << ".initMesh(fragmentShaderCode, vertexShaderCode);" << endl;
+            outputinitj << "}" << endl;
+        }
+    }
+    switch(useuishader[currentm]){
+        case false:
+        levelm[currentm].initMesh(fragmentShaderCode, vertexShaderCode);
+        break;
+        case true:
+        levelm[currentm].initMesh(fragmentuiShaderCode, vertexuiShaderCode);
+        break;
+    }
+}
+
 void playersettingswindow(){
     ImGui::Begin("Player settings");
     ImGui::Checkbox("enable physics", &eng.enablePhysics);
@@ -415,13 +476,46 @@ void playersettingswindow(){
     ImGui::InputText("project filename", projfilename, 256);
     if(ImGui::Button("load project")){
         projfilei.open(projfilename);
+        for(int i = 0; i != 30; i++){
+            projfilei >> eng.lightPositions[i];
+        }
+        for(int i = 0; i != 160; i++){
+            projfilei >> eng.shadowProj.mat[i];
+        }
+        for(int i = 0; i != 160; i++){
+            projfilei >> eng.shadowTrans.mat[i];
+        }
+        for(int i = 0; i != 160; i++){
+            projfilei >> eng.shadowxrot.mat[i];
+        }
+        for(int i = 0; i != 160; i++){
+            projfilei >> eng.shadowyrot.mat[i];
+        }
         for(int i = 0; i != 1000; i++){
             projfilei >> levelm[i].meshPosition.x >> levelm[i].meshPosition.y >> levelm[i].meshPosition.z >> levelm[i].meshRot.x >> levelm[i].meshRot.y >> levelm[i].meshRot.z >> levelm[i].meshScale.x >> levelm[i].meshScale.y >> levelm[i].meshScale.z >> pathtoalbedo[i] >> pathtospec[i] >> classname[i] >> classnamespec[i] >> objclassname[i] >> useuishader[i] >> reloadtex[i] >> writetextores[i] >> writetextoinit[i] >> writeobjtofile[i];
         }
         projfilei.close();
+        for(int i = 0; i!=1000; i++){
+            meshInit(i);
+        }
     }
     if(ImGui::Button("save project")){
         projfile.open(projfilename);
+        for(int i = 0; i != 30; i++){
+            projfile << eng.lightPositions[i] << endl;
+        }
+        for(int i = 0; i != 160; i++){
+            projfile << eng.shadowProj.mat[i] << endl;
+        }
+        for(int i = 0; i != 160; i++){
+            projfile << eng.shadowTrans.mat[i] << endl;
+        }
+        for(int i = 0; i != 160; i++){
+            projfile << eng.shadowxrot.mat[i] << endl;
+        }
+        for(int i = 0; i != 160; i++){
+            projfile << eng.shadowyrot.mat[i] << endl;
+        }
         for(int i = 0; i != 1000; i++){
             projfile << levelm[i].meshPosition.x << " " << levelm[i].meshPosition.y << " " << levelm[i].meshPosition.z << " " << levelm[i].meshRot.x << " " << levelm[i].meshRot.y << " " << levelm[i].meshRot.z << " " << levelm[i].meshScale.x << " " << levelm[i].meshScale.y << " " << levelm[i].meshScale.z << " " << pathtoalbedo[i] << " " << pathtospec[i] << " " << classname[i] << " " << classnamespec[i] << " " << objclassname[i] << " " << useuishader[i] << " " << reloadtex[i] << " " << writetextores[i] << " " << writetextoinit[i] << " " << writeobjtofile[i] << endl;
         }
@@ -653,6 +747,54 @@ int main(int argc, char **argv){
     outputinitj << "public class ginit{" << endl;
     outputinitj << "private final String fragmentShaderCode = " << '"' << fragmentShaderCode << '";' << endl;
     outputinitj << "private final String vertexShaderCode = " << '"' << vertexShaderCode << '";' << endl;
+
+    for(int i = 0; i!=1000; i++){
+        pathtoalbedo[i][0] = 'e';
+        pathtoalbedo[i][1] = 'm';
+        pathtoalbedo[i][2] = 'p';
+        pathtoalbedo[i][3] = 't';
+        pathtoalbedo[i][4] = 'y';
+    }
+
+    for(int i = 0; i!=1000; i++){
+        pathtospec[i][0] = 'e';
+        pathtospec[i][1] = 'm';
+        pathtospec[i][2] = 'p';
+        pathtospec[i][3] = 't';
+        pathtospec[i][4] = 'y';
+    }
+
+    for(int i = 0; i!=1000; i++){
+        classname[i][0] = 'e';
+        classname[i][1] = 'm';
+        classname[i][2] = 'p';
+        classname[i][3] = 't';
+        classname[i][4] = 'y';
+    }
+
+    for(int i = 0; i!=1000; i++){
+        classnamespec[i][0] = 'e';
+        classnamespec[i][1] = 'm';
+        classnamespec[i][2] = 'p';
+        classnamespec[i][3] = 't';
+        classnamespec[i][4] = 'y';
+    }
+
+    for(int i = 0; i!=1000; i++){
+        pathtoobj[i][0] = 'e';
+        pathtoobj[i][1] = 'm';
+        pathtoobj[i][2] = 'p';
+        pathtoobj[i][3] = 't';
+        pathtoobj[i][4] = 'y';
+    }
+
+    for(int i = 0; i!=1000; i++){
+        objclassname[i][0] = 'e';
+        objclassname[i][1] = 'm';
+        objclassname[i][2] = 'p';
+        objclassname[i][3] = 't';
+        objclassname[i][4] = 'y';
+    }
 
     while (!glfwWindowShouldClose(eng.window)){
         if(mousefocused == true){
