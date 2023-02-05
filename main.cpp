@@ -585,6 +585,11 @@ void lightEdit(){
     eng.lightPositions[currentl*3] = v[0];
     eng.lightPositions[currentl*3+1] = v[1];
     eng.lightPositions[currentl*3+2] = v[2];
+    if(ImGui::Button("move light to camera position")){
+        eng.lightPositions[currentl*3] = eng.pos.x;
+        eng.lightPositions[currentl*3+1] = eng.pos.y;
+        eng.lightPositions[currentl*3+2] = eng.pos.z;
+    }
     v[0] = eng.lightColors[currentl*3];
     v[1] = eng.lightColors[currentl*3+1];
     v[2] = eng.lightColors[currentl*3+2];
