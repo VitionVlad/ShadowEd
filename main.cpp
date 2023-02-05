@@ -586,9 +586,9 @@ void lightEdit(){
     eng.lightPositions[currentl*3+1] = v[1];
     eng.lightPositions[currentl*3+2] = v[2];
     if(ImGui::Button("move light to camera position")){
-        eng.lightPositions[currentl*3] = eng.pos.x;
-        eng.lightPositions[currentl*3+1] = eng.pos.y;
-        eng.lightPositions[currentl*3+2] = eng.pos.z;
+        eng.lightPositions[currentl*3] = -eng.pos.x;
+        eng.lightPositions[currentl*3+1] = -eng.pos.y;
+        eng.lightPositions[currentl*3+2] = -eng.pos.z;
     }
     v[0] = eng.lightColors[currentl*3];
     v[1] = eng.lightColors[currentl*3+1];
@@ -605,6 +605,10 @@ void lightEdit(){
     }
     if(ImGui::Button("save transform to init file")){
         outputinit << "void shadowmapinit(Engine& eng){" << endl;
+        for(int i = 0; i != 10; i++){
+            outputinit << "eng.lightPositions[" << i << "] = " << eng.lightPositions[i] << ";" << endl;
+            outputinit << "eng.lightColors[" << i << "] = " << eng.lightColors[i] << ";" << endl;
+        }
         for(int i = 0; i != 160; i++){
             outputinit << "eng.shadowProj.mat[" << i << "] = " << eng.shadowProj.mat[i] << ";" << endl;
             outputinit << "eng.shadowTrans.mat[" << i << "] = " << eng.shadowTrans.mat[i] << ";" << endl;
@@ -613,6 +617,10 @@ void lightEdit(){
         }
         outputinit << "}" << endl;
         outputinitj << "public void shadowmapinit(Engine eng){" << endl;
+        for(int i = 0; i != 10; i++){
+            outputinit << "eng.lightPositions[" << i << "] = " << eng.lightPositions[i] << ";" << endl;
+            outputinit << "eng.lightColors[" << i << "] = " << eng.lightColors[i] << ";" << endl;
+        }
         for(int i = 0; i != 160; i++){
             outputinitj << "eng.shadowProj.mat[" << i << "] = " << eng.shadowProj.mat[i] << ";" << endl;
             outputinitj << "eng.shadowTrans.mat[" << i << "] = " << eng.shadowTrans.mat[i] << ";" << endl;
