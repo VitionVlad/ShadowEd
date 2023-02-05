@@ -426,9 +426,7 @@ void meshInit(int currentm){
             objexport(pathtoobj[currentm], objclassname[currentm]);
         }
         if(writetextoinit[currentm] == true){
-            outputinit << "Mesh no" << currentm << ";" << endl;
-            outputinitj << "Mesh no" << currentm << ";" << endl;
-            string msname = "no" + to_string(currentm);
+            string msname = "levelm[" + to_string(currentm)+"]";
             outputinit << "void initm" << currentm << "(Engine &eng){" << endl;
             outputinit << "eng.copyFloatArray(" << objclassname[currentm] << "_model().verts, " << msname << ".vertexes);" << endl;
             outputinit << "eng.copyFloatArray(" << objclassname[currentm] << "_normals().normals, " << msname << ".normals);" << endl;
@@ -442,7 +440,8 @@ void meshInit(int currentm){
             outputinit << msname << ".meshPosition.z = " << levelm[currentm].meshPosition.z << ";" << endl;
             outputinit << msname << ".initMesh(fragmentShaderCode, vertexShaderCode);" << endl;
             outputinit << "}" << endl;
-            outputinitj << "void initm" << currentm << "(Engine eng){" << endl;
+            outputinitj << "public void initm" << currentm << "(Engine eng){" << endl;
+            outputinitj << msname << " = new Mesh();" << endl;
             outputinitj << "eng.copyFloatArray(" << objclassname[currentm] << "_model().verts, " << msname << ".vertexes);" << endl;
             outputinitj << "eng.copyFloatArray(" << objclassname[currentm] << "_normals().normals, " << msname << ".normals);" << endl;
             outputinitj << "eng.copyFloatArray(" << objclassname[currentm] << "_uv().uv, " << msname << ".uv);" << endl;
@@ -531,65 +530,7 @@ void meshEdit(){
         currentm = 0;
     }
     if(ImGui::Button("Init mesh")){
-        glDeleteTextures(1, &levelm[currentm].albedoHandle);
-        glDeleteTextures(1, &levelm[currentm].specularHandle);
-        if(reloadtex[currentm] == true){
-            objimport(pathtoobj[currentm], levelm[currentm]);
-            if(writetextores[currentm] == true){
-                loadImage(pathtoalbedo[currentm], levelm[currentm].texture, levelm[currentm].texResolution.x, levelm[currentm].texResolution.y, classname[currentm]);
-                loadImage(pathtospec[currentm], levelm[currentm].specular, levelm[currentm].texResolution.x, levelm[currentm].texResolution.y, classnamespec[currentm]);
-                outputres << "#include " << '"' << classname[currentm] << "_texture.hpp" << '"' << endl;
-                outputres << "#include " << '"' << classnamespec[currentm] << "_texture.hpp" << '"' << endl;
-            }
-            if(writeobjtofile[currentm] == true){
-                outputres << "#include " << '"' << objclassname[currentm] << "_model.hpp" << '"' << endl;
-                outputres << "#include " << '"' << objclassname[currentm] << "_normals.hpp" << '"' << endl;
-                outputres << "#include " << '"' << objclassname[currentm] << "_uv.hpp" << '"' << endl;
-                objexport(pathtoobj[currentm], objclassname[currentm]);
-            }
-            if(writetextoinit[currentm] == true){
-                outputinit << "Mesh no" << currentm << ";" << endl;
-                outputinitj << "Mesh no" << currentm << ";" << endl;
-                string msname = "no" + to_string(currentm);
-                outputinit << "void initm" << currentm << "(Engine &eng){" << endl;
-                outputinit << "eng.copyFloatArray(" << objclassname[currentm] << "_model().verts, " << msname << ".vertexes);" << endl;
-                outputinit << "eng.copyFloatArray(" << objclassname[currentm] << "_normals().normals, " << msname << ".normals);" << endl;
-                outputinit << "eng.copyFloatArray(" << objclassname[currentm] << "_uv().uv, " << msname << ".uv);" << endl;
-                outputinit << "eng.copyucharArray(" << classname[currentm] << "_texture().pixels, " << msname << ".texture);" << endl;
-                outputinit << "eng.copyucharArray(" << classnamespec[currentm] << "_texture().pixels, " << msname << ".specular);" << endl;
-                outputinit << msname << ".texResolution.x = " << levelm[currentm].texResolution.x << ";" << endl;
-                outputinit << msname << ".texResolution.y = " << levelm[currentm].texResolution.y << ";" << endl;
-                outputinit << msname << ".meshPosition.x = " << levelm[currentm].meshPosition.x << ";" << endl;
-                outputinit << msname << ".meshPosition.y = " << levelm[currentm].meshPosition.y << ";" << endl;
-                outputinit << msname << ".meshPosition.z = " << levelm[currentm].meshPosition.z << ";" << endl;
-                outputinit << msname << ".initMesh(fragmentShaderCode, vertexShaderCode);" << endl;
-                outputinit << "}" << endl;
-
-                outputinitj << "void initm" << currentm << "(Engine eng){" << endl;
-                outputinitj << "eng.copyFloatArray(" << objclassname[currentm] << "_model().verts, " << msname << ".vertexes);" << endl;
-                outputinitj << "eng.copyFloatArray(" << objclassname[currentm] << "_normals().normals, " << msname << ".normals);" << endl;
-                outputinitj << "eng.copyFloatArray(" << objclassname[currentm] << "_uv().uv, " << msname << ".uv);" << endl;
-                outputinitj << "eng.copyucharArray(" << classname[currentm] << "_texture().pixels, " << msname << ".texture);" << endl;
-                outputinitj << "eng.copyucharArray(" << classnamespec[currentm] << "_texture().pixels, " << msname << ".specular);" << endl;
-                outputinitj << msname << ".texResolution = new ivec2();" << endl;
-                outputinitj << msname << ".texResolution.x = " << levelm[currentm].texResolution.x << ";" << endl;
-                outputinitj << msname << ".texResolution.y = " << levelm[currentm].texResolution.y << ";" << endl;
-                outputinitj << msname << ".meshPosition = new vec3();" << endl;
-                outputinitj << msname << ".meshPosition.x = " << levelm[currentm].meshPosition.x << ";" << endl;
-                outputinitj << msname << ".meshPosition.y = " << levelm[currentm].meshPosition.y << ";" << endl;
-                outputinitj << msname << ".meshPosition.z = " << levelm[currentm].meshPosition.z << ";" << endl;
-                outputinitj << msname << ".initMesh(fragmentShaderCode, vertexShaderCode);" << endl;
-                outputinitj << "}" << endl;
-            }
-        }
-        switch(useuishader[currentm]){
-            case false:
-            levelm[currentm].initMesh(fragmentShaderCode, vertexShaderCode);
-            break;
-            case true:
-            levelm[currentm].initMesh(fragmentuiShaderCode, vertexuiShaderCode);
-            break;
-        }
+        meshInit(currentm);
     }
     ImGui::SliderInt("Mesh render type", &renderm[currentm], 0, 2);
     ImGui::Checkbox("use ui shader", &useuishader[currentm]);
@@ -658,10 +599,22 @@ void lightEdit(){
         eng.shadowyrot.buildyrotmat(-eng.rot.x, currentl);
     }
     if(ImGui::Button("save transform to init file")){
-        eng.shadowProj.buildperspectivemat(eng.fov, 0.1, 100, 1, currentl);
-        eng.shadowTrans.buildtranslatemat(eng.pos, currentl);
-        eng.shadowxrot.buildxrotmat(eng.rot.y, currentl);
-        eng.shadowyrot.buildyrotmat(-eng.rot.x, currentl);
+        outputinit << "void shadowmapinit(Engine& eng){" << endl;
+        for(int i = 0; i != 160; i++){
+            outputinit << "eng.shadowProj.mat[" << i << "] = " << eng.shadowProj.mat[i] << ";" << endl;
+            outputinit << "eng.shadowTrans.mat[" << i << "] = " << eng.shadowTrans.mat[i] << ";" << endl;
+            outputinit << "eng.shadowxrot.mat[" << i << "] = " << eng.shadowxrot.mat[i] << ";" << endl;
+            outputinit << "eng.shadowyrot.mat[" << i << "] = " << eng.shadowyrot.mat[i] << ";" << endl;
+        }
+        outputinit << "}" << endl;
+        outputinitj << "public void shadowmapinit(Engine eng){" << endl;
+        for(int i = 0; i != 160; i++){
+            outputinitj << "eng.shadowProj.mat[" << i << "] = " << eng.shadowProj.mat[i] << ";" << endl;
+            outputinitj << "eng.shadowTrans.mat[" << i << "] = " << eng.shadowTrans.mat[i] << ";" << endl;
+            outputinitj << "eng.shadowxrot.mat[" << i << "] = " << eng.shadowxrot.mat[i] << ";" << endl;
+            outputinitj << "eng.shadowyrot.mat[" << i << "] = " << eng.shadowyrot.mat[i] << ";" << endl;
+        }
+        outputinitj << "}" << endl;
     }
     ImGui::End();
 }
@@ -737,16 +690,24 @@ int main(int argc, char **argv){
 
     outputres.open("app_res.hpp");
     outputres << "#include <iostream>\n";
+    outputres << "const char* fragmentShaderCode = " << '"' << fragmentShaderCode << '";' << endl;
+    outputres << "const char* vertexShaderCode = " << '"' << vertexShaderCode << '";' << endl;
+    outputres << "const char* fragmentuiShaderCode = " << '"' << fragmentuiShaderCode << '";' << endl;
+    outputres << "const char* vertexuiShaderCode = " << '"' << vertexuiShaderCode << '";' << endl;
 
     outputinit.open("app_init.hpp");
     outputinit << "#include <iostream>\n";
     outputinit << "#include " << '"' << "app_res.hpp" << '"' << endl;
+    outputinit << "Mesh levelm[1000];" << endl;
 
     outputinitj.open("app_init.java");
     outputinitj << "package com.smoke.shadowtechandroid;" << endl;
     outputinitj << "public class ginit{" << endl;
-    outputinitj << "private final String fragmentShaderCode = " << '"' << fragmentShaderCode << '";' << endl;
-    outputinitj << "private final String vertexShaderCode = " << '"' << vertexShaderCode << '";' << endl;
+    outputinitj << "private final String fragmentShaderCode = " << '"' << fragmentShaderCode32 << '";' << endl;
+    outputinitj << "private final String vertexShaderCode = " << '"' << vertexShaderCode32 << '";' << endl;
+    outputinitj << "private final String fragmentuiShaderCode = " << '"' << fragmentuiShaderCode32 << '";' << endl;
+    outputinitj << "private final String vertexuiShaderCode = " << '"' << vertexuiShaderCode32 << '";' << endl;
+    outputinitj << "Mesh[] levelm = new Mesh[1000];" << endl;
 
     for(int i = 0; i!=1000; i++){
         pathtoalbedo[i][0] = 'e';
@@ -846,8 +807,6 @@ int main(int argc, char **argv){
         eng.endFrame();
     }
     outputinitj <<"}" << endl;
-    outputres << "const char* fragmentShaderCode = " << '"' << fragmentShaderCode << '";' << endl;
-    outputres << "const char* vertexShaderCode = " << '"' << vertexShaderCode << '";' << endl;
     alutExit();
     return 1;
 }
