@@ -819,6 +819,18 @@ int main(int argc, char **argv){
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         eng.endFrame();
     }
+    outputinit << "void initmeshes(Engine& eng){" << endl;
+    for(int i = 0; i!=1000;i++){
+        outputinit << "initm" << i << "(eng);" << endl;
+    }
+    outputinit <<"}" << endl;
+
+    outputinitj << "void initmeshes(Engine eng){" << endl;
+    for(int i = 0; i!=1000;i++){
+        outputinitj << "initm" << i << "(eng);" << endl;
+    }
+    outputinitj <<"}" << endl;
+
     outputinitj <<"}" << endl;
     alutExit();
     return 1;
